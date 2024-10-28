@@ -49,8 +49,8 @@ Este é um projeto que simula uma aplicação estilo Twitter, onde os usuários 
 
 3. Crie e ative um ambiente virtual:
    ```bash
-  python3 -m venv venv
-  source venv/bin/activate  # No Windows, use: venv\Scripts\activate
+   python3 -m venv venv
+   source venv/bin/activate  # No Windows, use: venv\Scripts\activate
 
 4. Instale as dependências:
    ```bash
