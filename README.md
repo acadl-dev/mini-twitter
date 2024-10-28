@@ -41,8 +41,7 @@ Este é um projeto que simula uma aplicação estilo Twitter, onde os usuários 
 
 1. Clone o repositório:
    ```bash
-   [git clone https://github.com/acadl-dev/mini-twitter.git
-   git clone 
+   git clone https://github.com/acadl-dev/mini-twitter.git  
 
 2. Navegue para a pasta do backend:
    ```bash
@@ -68,4 +67,55 @@ Este é um projeto que simula uma aplicação estilo Twitter, onde os usuários 
     ```bash
    python manage.py runserver
 
+    
+### Frontend
+
+1. Navegue para a pasta do frontend:
+    ```bash
+   cd ../frontend
+    
+2. Instale as dependências:
+    ```bash
+   npm install
+    
+3. Inicie o servidor de desenvolvimento:
+    ```bash
+   npm run dev
+
+## Contribuindo
+
+Contribuições são bem-vindas! Se você deseja ajudar a melhorar o projeto, siga estas etapas:
+
+### Passo a Passo para Contribuir
+
+1. **Faça um Fork do Repositório**
+
+   No canto superior direito da página do repositório, clique em **Fork**. Isso criará uma cópia do repositório na sua conta do GitHub.
+
+2. **Clone o Repositório Forkado**
+
+   Clone o repositório forkado para o seu computador local. No terminal, execute:
+   ```bash
+   git clone https://github.com/seu-usuario/mini-twitter.git
    
+3. Crie uma Nova Branch
+   ```bash
+   cd mini-twitter
+   git checkout -b feature/nova-funcionalidade
+   
+4. Faça suas Alterações
+  Realize as alterações desejadas no código. Você pode adicionar novas funcionalidades, corrigir bugs...
+   
+5. Faça o Commit das suas Alterações
+   Após fazer as alterações, adicione os arquivos modificados ao seu commit:
+   ```bash
+   git add .
+   
+6. Envie suas Alterações para o Repositório Remoto
+   ```bash
+   git commit -m 'Adicionei uma nova funcionalidade'
+
+7. Abra um Pull Request
+     Vá para a página do seu repositório forkado no GitHub. Você verá um botão Compare & pull request. Clique nele. Adicione uma descrição das suas alterações e clique em Create pull request.
+   
+
