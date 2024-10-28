@@ -1,6 +1,6 @@
 # Mini Twitter
 
-Este é um projeto que simula uma aplicação estilo Twitter, onde os usuários podem se cadastrar, fazer login e postar tweets. A aplicação possui um backend desenvolvido com Python e Django, e um frontend em React e Next.js, utilizando PostgreSQL para armazenamento dos dados.
+Este é um projeto que simula uma aplicação estilo Twitter, onde os usuários podem se cadastrar, fazer login e postar tweets. A aplicação possui um backend desenvolvido com Python e Django, e um frontend em React e Next.js, utilizando PostgreSQL para armazenamento dos dados. As imagens enviadas nos tweets são enviadas para um Bucket S3.
 
 ## Funcionalidades
 
