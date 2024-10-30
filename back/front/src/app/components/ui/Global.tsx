@@ -6,7 +6,7 @@ import { Input } from "@/app/components/ui/input";
 import { Avatar, AvatarImage } from "@/app/components/ui/avatar";
 import { Label } from "@/app/components/ui/label";
 import { Button } from "@/app/components/ui/button";
-import { SearchIcon, Heart } from "lucide-react";
+import { SearchIcon, Heart, UserPlusIcon } from "lucide-react";
 import Image from 'next/image';
 
 interface Tweet {
@@ -15,7 +15,8 @@ interface Tweet {
   content: string;
   likes_count: number;
   image_url?: string;
-  is_liked: boolean; // Campo para rastrear se o tweet foi curtido
+  is_liked: boolean;
+  is_following?: boolean;
 }
 
 interface GlobalProps {
@@ -26,36 +27,68 @@ export default function Global({ isLoading }: GlobalProps) {
   const [tweets, setTweets] = useState<Tweet[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredTweets, setFilteredTweets] = useState<Tweet[]>([]);
+  const [following, setFollowing] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetchTweets = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem('authToken');
-        const response = await fetch('http://127.0.0.1:8000/api/posts/all/', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
+        if (!token) {
+          console.error('Token de autenticação não encontrado');
+          return;
         }
-        const data = await response.json();
-        // Inverte a ordem dos tweets
-        setTweets(data.map((tweet: Tweet) => ({ ...tweet })).reverse()); // Inverte a lista aqui
+
+        const [followingResponse, tweetsResponse] = await Promise.all([
+          fetch('http://127.0.0.1:8000/api/user/following/', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }),
+          fetch('http://127.0.0.1:8000/api/posts/all/', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }),
+        ]);
+
+        if (!followingResponse.ok) {
+          const errorData = await followingResponse.json();
+          console.error('Erro ao obter lista de seguindo:', errorData);
+          return;
+        }
+        if (!tweetsResponse.ok) {
+          const errorData = await tweetsResponse.json();
+          console.error('Erro ao obter tweets:', errorData);
+          return;
+        }
+
+        const followingData = await followingResponse.json();
+        const tweetsData = await tweetsResponse.json();
+
+        const followingList = followingData.following || [];
+        setFollowing(followingList);
+
+        const followingSet = new Set(followingList);
+
+        const mappedTweets = tweetsData.map((tweet: Tweet) => ({
+          ...tweet,
+          is_following: followingSet.has(tweet.username),
+        })).reverse();
+
+        setTweets(mappedTweets);
+        setFilteredTweets(mappedTweets);
+
       } catch (error) {
-        console.error('Failed to fetch tweets:', error);
+        console.error('Erro ao buscar dados:', error);
       }
     };
 
-    fetchTweets();
+    fetchData();
   }, []);
-
-
-  useEffect(() => {
-    setFilteredTweets(tweets);
-  }, [tweets]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,6 +101,11 @@ export default function Global({ isLoading }: GlobalProps) {
 
   const toggleLike = async (tweet: Tweet) => {
     const token = localStorage.getItem('authToken');
+    if (!token) {
+      console.error('Token de autenticação não encontrado');
+      return;
+    }
+
     const endpoint = tweet.is_liked
       ? `http://127.0.0.1:8000/api/posts/${tweet.id}/unlike/`
       : `http://127.0.0.1:8000/api/posts/${tweet.id}/like/`;
@@ -82,20 +120,65 @@ export default function Global({ isLoading }: GlobalProps) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to toggle like');
+        const errorData = await response.json();
+        console.error('Erro ao curtir/descurtir:', errorData);
+        return;
       }
 
       const data = await response.json();
-      // Atualiza o estado com base na resposta da API
       setTweets(prevTweets =>
         prevTweets.map(t =>
           t.id === tweet.id
-            ? { ...t, is_liked: !t.is_liked, likes_count: data.likes_count } // Atualiza is_liked e likes_count
+            ? { ...t, is_liked: !t.is_liked, likes_count: data.likes_count }
             : t
         )
       );
     } catch (error) {
-      console.error('Error toggling like:', error);
+      console.error('Erro ao curtir/descurtir:', error);
+    }
+  };
+
+  const toggleFollow = async (username: string) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      console.error('Token de autenticação não encontrado');
+      return;
+    }
+
+    const endpoint = following.includes(username)
+      ? `http://127.0.0.1:8000/api/user/unfollow/${username}/`
+      : `http://127.0.0.1:8000/api/user/follow/${username}/`;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Erro ao seguir/desseguir:', errorData);
+        return;
+      }
+
+      setFollowing(prev =>
+        prev.includes(username)
+          ? prev.filter(name => name !== username)
+          : [...prev, username]
+      );
+
+      setTweets(prevTweets =>
+        prevTweets.map(t =>
+          t.username === username
+            ? { ...t, is_following: !t.is_following }
+            : t
+        )
+      );
+    } catch (error) {
+      console.error('Erro ao seguir/desseguir:', error);
     }
   };
 
@@ -106,7 +189,18 @@ export default function Global({ isLoading }: GlobalProps) {
           <AvatarImage src="/placeholder.svg?height=40&width=40" alt={tweet.username} />
         </Avatar>
         <div className="flex-grow">
-          <div><p className="font-semibold">{tweet.username}</p> </div>
+          <div className="flex justify-between items-center">
+            <p className="font-semibold">{tweet.username}</p>
+            <Button
+              variant={tweet.is_following ? "secondary" : "outline"}
+              size="sm"
+              onClick={() => toggleFollow(tweet.username)}
+              className={tweet.is_following ? 'bg-green-100 text-green-700' : ''}
+            >
+              {tweet.is_following ? 'Seguindo' : (<><UserPlusIcon className="h-4 w-4 mr-2" />Seguir</>)}
+            </Button>
+          </div>
+
           <p className="text-sm text-gray-500">{tweet.content}</p>
           {tweet.image_url && (
             <div className="mt-2 relative w-full h-40">
@@ -120,22 +214,15 @@ export default function Global({ isLoading }: GlobalProps) {
             </div>
           )}
           <div className="flex items-center mt-2 space-x-4 text-sm text-gray-500">
-             
-              <Button
-                variant="outline"
-                size="icon"
-                className={`transition-all duration-300 ease-in-out ${tweet.is_liked ? 'bg-red-100 border-red-300' : 'bg-background'
-                  }`} 
-                  onClick={() => toggleLike(tweet)}               
-              >
-                <Heart
-                  className={`h-5 w-5 transition-all duration-300 ease-in-out ${tweet.is_liked ? 'fill-red-500 stroke-red-500' : 'fill-none stroke-current'
-                    }`}
-                />
-                <span className="sr-only">Curtir</span>
-              </Button>
-              <span>{tweet.likes_count}</span>
-            
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => toggleLike(tweet)}
+              className={`transition-all duration-300 ${tweet.is_liked ? 'bg-red-100 border-red-300' : 'bg-background'}`}
+            >
+              <Heart className={`h-5 w-5 ${tweet.is_liked ? 'fill-red-500 stroke-red-500' : 'fill-none stroke-current'}`} />
+            </Button>
+            <span>{tweet.likes_count}</span>
           </div>
         </div>
       </CardContent>
@@ -159,13 +246,7 @@ export default function Global({ isLoading }: GlobalProps) {
         </div>
       </form>
       <div className="h-[calc(100vh-250px)] overflow-y-auto space-y-4">
-        {isLoading ? (
-          <p className="text-center">Loading global tweets...</p>
-        ) : filteredTweets.length > 0 ? (
-          filteredTweets.map(renderTweet)
-        ) : (
-          <p className="text-center">Loading...</p>
-        )}
+        {isLoading ? <p>Carregando...</p> : filteredTweets.map(renderTweet)}
       </div>
     </div>
   );

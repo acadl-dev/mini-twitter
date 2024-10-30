@@ -5,6 +5,8 @@ import { motion } from 'framer-motion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/components/ui/tabs"
 import MyTweets from "@/app/components/ui/myTweets"
 import Global from '@/app/components/ui/Global'
+import Following from '@/app/components/ui/Following'
+
 
 export default function Feed() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -28,12 +30,15 @@ export default function Feed() {
             <TabsContent value="my-tweets" className="mt-4">
               <MyTweets />
             </TabsContent>
+
+
             <TabsContent value="following-tweets" className="mt-4">
-              <div className="h-[calc(100vh-200px)] overflow-y-auto">
-                {/* Placeholder content for following tweets */}
-                <p>Following tweets will be displayed here.</p>
+              <div className="h-[calc(100vh-200px)] overflow-y-auto">                
+              <Following isLoading={false} />
               </div>
             </TabsContent>
+
+
             <TabsContent value="global-tweets" className="mt-4">             
                 <Global isLoading={false} />             
             </TabsContent>

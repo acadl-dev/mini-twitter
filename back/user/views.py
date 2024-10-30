@@ -13,13 +13,23 @@ from rest_framework.permissions import IsAuthenticated
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])  # Certifique-se de que o usuário está autenticado
 def follow_user(request, username):
     try:
         user_to_follow = User.objects.get(username=username)
-        # Lógica para seguir o usuário
+        follower = request.user
+
+        # Verificar se já está seguindo
+        if Follower.objects.filter(follower=follower, followed=user_to_follow).exists():
+            return Response({"detail": "Você já está seguindo este usuário."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Criar uma nova instância de Follower
+        Follower.objects.create(follower=follower, followed=user_to_follow)
+
         return JsonResponse({"message": f"Você seguiu {user_to_follow.username}."}, status=status.HTTP_200_OK)
     except User.DoesNotExist:
         return JsonResponse({"error": "Usuário não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
 
 @api_view(['POST'])
 def unfollow_user(request, username):

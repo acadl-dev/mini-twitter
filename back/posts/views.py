@@ -14,6 +14,7 @@ from rest_framework import generics, permissions
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
+from user.models import Follower  # Importar o modelo Follower
 
 
 
@@ -132,3 +133,19 @@ class UnlikePost(APIView):
         post.likes_count -= 1
         post.save()
         return JsonResponse({'message': 'Post unliked successfully.', 'likes_count': post.likes_count})
+    
+    
+@api_view(['GET'])
+def following_posts(request):
+    # Obtém o usuário autenticado
+    follower = request.user
+
+    # Obtém os IDs dos usuários que o usuário está seguindo
+    following_ids = Follower.objects.filter(follower=follower).values_list('followed', flat=True)
+
+    # Busca todos os posts dos usuários seguidos
+    posts = Post.objects.filter(user__in=following_ids).order_by('-created_at')
+
+    # Serializa os posts
+    serializer = PostSerializer(posts, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
