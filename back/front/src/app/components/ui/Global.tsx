@@ -74,10 +74,15 @@ export default function Global({ isLoading }: GlobalProps) {
 
         const followingSet = new Set(followingList);
 
-        const mappedTweets = tweetsData.map((tweet: Tweet) => ({
-          ...tweet,
-          is_following: followingSet.has(tweet.username),
-        })).reverse();
+        console.log('tweetsData:', tweetsData);
+
+
+        const mappedTweets = Array.isArray(tweetsData.results) ? 
+    tweetsData.results.map((tweet: Tweet) => ({
+        ...tweet,
+        is_following: followingSet.has(tweet.username),
+    })).reverse() : [];
+
 
         setTweets(mappedTweets);
         setFilteredTweets(mappedTweets);

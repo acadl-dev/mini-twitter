@@ -10,7 +10,7 @@ urlpatterns = [
     path('edit/<int:pk>/', TweetDetail.as_view(), name='tweet-detail'),  # Use 'pk' para o ID do tweet
     path('delete/<int:pk>/', TweetDetail.as_view(), name='tweet-delete'),  # Use 'pk' para o ID do tweet
     path('all/', TweetListView.as_view(), name='tweet-list'),  # Rota para listar todos os tweets
-     path('<int:post_id>/like/', LikePost.as_view(), name='like_post'), # Rota para curtir um post
+    path('<int:post_id>/like/', LikePost.as_view(), name='like_post'), # Rota para curtir um post
     path('<int:post_id>/unlike/', UnlikePost.as_view(), name='unlike_post'), # Rota para descurtir um post
     path('ifollowing/', following_posts, name='following-posts'),
 ]

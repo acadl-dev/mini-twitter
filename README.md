@@ -10,10 +10,10 @@ Este é um projeto que simula uma aplicação estilo Twitter, onde os usuários 
 - Seguir e deixar de seguir outros usuários
 - Visualização do feed de tweets
 - Opção de Follow/Unfollow outros usuarios
+- Impletação da fucncionalidade pagination para o feed de tweets
 
 ### Futuras melhorias
 
-- Implementação do sistema de páginação do Django
 - Adicionar fotos para cada usuário
 
 ## Tecnologias Utilizadas

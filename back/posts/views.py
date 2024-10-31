@@ -15,6 +15,10 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from user.models import Follower  # Importar o modelo Follower
+from rest_framework import viewsets # Importar viewsets do Django Rest Framework
+from .pagination import TweetCursorPagination  # Importe a sua classe de paginação
+
+
 
 
 
@@ -92,19 +96,19 @@ class TweetDetail(generics.RetrieveUpdateDestroyAPIView):
         return Response(status=204)  # Retorna um status 204 No Content após a exclusão
     
 class TweetListView(generics.ListAPIView):
-    queryset = Post.objects.all()
+    queryset = Post.objects.all()  # Defina o queryset inicial aqui
     serializer_class = PostSerializer
+    pagination_class = TweetCursorPagination  # Adiciona paginação
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
         posts = super().get_queryset()
-        
         # Adiciona is_liked ao queryset
         for post in posts:
             post.is_liked = Like.objects.filter(user=user, post=post).exists()
-        
         return posts
+
 
     
 class LikePost(APIView):
@@ -149,3 +153,8 @@ def following_posts(request):
     # Serializa os posts
     serializer = PostSerializer(posts, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+class TweetViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all().order_by('-created_at')  # Ordene os tweets
+    serializer_class = PostSerializer
+    pagination_class = TweetCursorPagination  # Aplique a classe de paginação personalizada
