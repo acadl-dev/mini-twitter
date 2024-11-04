@@ -81,7 +81,7 @@ export default function Global({ isLoading }: GlobalProps) {
     tweetsData.results.map((tweet: Tweet) => ({
         ...tweet,
         is_following: followingSet.has(tweet.username),
-    })).reverse() : [];
+    })) : [];
 
 
         setTweets(mappedTweets);

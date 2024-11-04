@@ -17,6 +17,9 @@ export default function HomePage() {
   const [tweetImage, setTweetImage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [apiResponse, setApiResponse] = useState<{ success: boolean; message: string } | null>(null)
+  const [name, setName] = useState('');
+
+  const [username, setUsername] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -29,6 +32,33 @@ export default function HomePage() {
     }
     checkAndRefreshToken()
   }, [])
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/accounts/get_user_info/', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUsername(data.username);
+        } else {
+          console.error('Failed to fetch user info');
+        }
+      } catch (error) {
+        console.error('Error fetching user info:', error);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
 
   const handleProfilePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -177,7 +207,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <h2 className="mt-4 text-xl font-semibold">User Name</h2>
-                <p className="text-gray-500">@username</p>
+                <p className="text-gray-500">{username}</p>
               </div>
 
               {apiResponse && (

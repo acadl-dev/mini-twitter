@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import make_password
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-from django.contrib.auth import authenticate
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 
 @csrf_exempt
@@ -63,4 +63,13 @@ def login(request):
         return JsonResponse({'error': 'Invalid credentials'}, status=400)
 
 
-
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_info(request):  #recuperar o nome do ususario para o perfil
+    user = request.user
+    return JsonResponse({
+        'username': user.username,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'email': user.email
+    })
