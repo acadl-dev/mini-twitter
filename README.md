@@ -10,7 +10,7 @@ Este é um projeto que simula uma aplicação estilo Twitter, onde os usuários 
 - Seguir e deixar de seguir outros usuários
 - Visualização do feed de tweets
 - Opção de Follow/Unfollow outros usuarios
-- Impletação da fucncionalidade pagination para o feed de tweets
+- Impletação da funcionalidade cursor pagination para o feed de tweets
 
 ### Futuras melhorias
 
